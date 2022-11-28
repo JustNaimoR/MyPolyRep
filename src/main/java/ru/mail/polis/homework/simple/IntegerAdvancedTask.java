@@ -1,6 +1,8 @@
 package ru.mail.polis.homework.simple;
 
 
+import javax.swing.plaf.metal.MetalTheme;
+
 /**
  * Возможно вам понадобится класс Math с его методами. Например, чтобы вычислить квадратный корень, достаточно написать
  * Math.sqrt(1.44)
@@ -18,7 +20,11 @@ public class IntegerAdvancedTask {
      * Пример: (1, 2, 3) -> 7
      */
     public static long progression(int a, double q, int n) {
-        return 0;
+        if (n == 1) {
+            return a;
+        }
+
+        return a * (long) Math.pow(q, n - 1) + progression(a, q, n - 1);
     }
 
     /**
@@ -30,7 +36,29 @@ public class IntegerAdvancedTask {
      * Пример: (10, 3, 5, 5, 20, 11) -> 2
      */
     public static int snake(int up, int right, int down, int left, int grassX, int grassY) {
-        return 0;
+        int curX = 0,
+            curY = 0;
+        int day = 0;
+
+        if (up <= down && right <= left && up < grassY && right < grassX) {
+            // Когда шаг вправо и вверх менее шага вниз и влево соответственно
+            return Integer.MAX_VALUE;
+        }
+
+        while (curX < grassX && curY < grassY) {
+            day++;
+            curY += up;
+            curX += right;
+
+            if (!(curX < grassX && curY < grassY)) {
+                return day;
+            }
+
+            curY -= down;
+            curX -= left;
+        }
+
+        return day;
     }
 
     /**
@@ -40,7 +68,26 @@ public class IntegerAdvancedTask {
      * Пример: (454355, 2) -> D
      */
     public static char kDecimal(int n, int order) {
-        return 0;
+        while (order-- > 1) {
+            n = n / 16;
+        }
+
+        switch (n % 16) {
+            case 10:
+                return 'A';
+            case 11:
+                return 'B';
+            case 12:
+                return 'C';
+            case 13:
+                return 'D';
+            case 14:
+                return 'E';
+            case 15:
+                return 'F';
+            default:
+                return (char) ('0' + n % 16);
+        }
     }
 
     /**
@@ -51,7 +98,21 @@ public class IntegerAdvancedTask {
      * (6726455) -> 2
      */
     public static byte minNumber(long a) {
-        return 0;
+        int min = 17;
+        byte minNum = 0;
+        int step = 1;
+
+        while (a > 0) {
+            if (a % 16 < min) {
+                min = (int) (a % 16);
+                minNum = (byte) step;
+            }
+
+            step++;
+            a = a / 16;
+        }
+
+        return minNum;
     }
 
 }
