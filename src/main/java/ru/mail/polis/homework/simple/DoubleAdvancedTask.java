@@ -21,6 +21,9 @@ public class DoubleAdvancedTask {
      */
     public static String equation(int d, int a, int b, int c) {
         // Формула Виетта
+
+        return 0 + "";
+        /*
         double[] result;
         if (d != 1) {
             a = a / d;
@@ -66,8 +69,9 @@ public class DoubleAdvancedTask {
         Arrays.sort(result);
 
         return result[2] + ", " + result[1] + ", " + result[0];
-
+*/
         /*
+
         // (Для x^3 + Ax^2 + Bx + C = 0)
         double A = 0,
                B = 0,
@@ -98,6 +102,7 @@ public class DoubleAdvancedTask {
         } else {
             return 0 + ", " + 0 + ", " + 0;
         }
+
         */
     }
 
