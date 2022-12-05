@@ -1,6 +1,8 @@
 package ru.mail.polis.homework.objects;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Вам придется реализовать Iterable класс CustomArrayWrapper вместе с методами которые
@@ -48,7 +50,29 @@ public class CustomArrayWrapper implements Iterable<Integer> {
      */
     @Override
     public Iterator<Integer> iterator() {
-        return null;
+
+        class DefaultIterator implements Iterator<Integer> {
+
+            private final int[] array;
+            private int curPos;
+
+            DefaultIterator(int[] array) {
+                this.array = array;
+                curPos = 0;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return curPos < array.length;
+            }
+
+            @Override
+            public Integer next() {
+                return array[curPos++];
+            }
+        }
+
+        return new DefaultIterator(array);
     }
 
     /**
@@ -58,7 +82,36 @@ public class CustomArrayWrapper implements Iterable<Integer> {
      * @return Iterator for EVEN elements
      */
     public Iterator<Integer> evenIterator() {
-        return null;
+        class EvenIterator implements Iterator<Integer> {
+
+            private final int[] array;
+            private final int size;
+            private int curPos;
+
+            EvenIterator(int[] array, int size) {
+                this.array = array;
+                this.size = size;
+                curPos = 1;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return curPos < size;
+            }
+
+            @Override
+            public Integer next() {
+                if (hasNext()) {
+                    Integer i = array[curPos];
+                    curPos += 2;
+                    return i;
+                } else {
+                    throw new ConcurrentModificationException();
+                }
+            }
+        }
+
+        return new EvenIterator(array, position);
     }
 
     /**
@@ -68,7 +121,36 @@ public class CustomArrayWrapper implements Iterable<Integer> {
      * @return Iterator for ODD elements
      */
     public Iterator<Integer> oddIterator() {
-        return null;
+        class OddIterator implements Iterator<Integer> {
+
+            private final int[] array;
+            private final int curLength;
+            private int curPos;
+
+            OddIterator(int[] array, int size) {
+                this.array = array;
+                curLength = size;
+                curPos = 0;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return curPos < curLength;
+            }
+
+            @Override
+            public Integer next() {
+                if (hasNext()) {
+                    Integer i = array[curPos];
+                    curPos += 2;
+                    return i;
+                } else {
+                    throw new ConcurrentModificationException();
+                }
+            }
+        }
+
+        return new OddIterator(array, position);
     }
 
     private void checkIndex(int index) {
