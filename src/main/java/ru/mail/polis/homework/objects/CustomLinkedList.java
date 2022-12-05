@@ -1,14 +1,14 @@
 package ru.mail.polis.homework.objects;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * 15 тугриков
  * Реализовать все методы односвязного списка.
  */
 public class CustomLinkedList implements Iterable<Integer> {
-
-    private Node head;
+    private Node head = null;
 
     /**
      * 1 тугрик
@@ -17,7 +17,15 @@ public class CustomLinkedList implements Iterable<Integer> {
      * @return size
      */
     public int size() {
-        return 0;
+        int k = 0;
+        Node cur = head;
+
+        while (cur != null) {
+            k++;
+            cur = cur.next;
+        }
+
+        return k;
     }
 
     /**
@@ -28,7 +36,7 @@ public class CustomLinkedList implements Iterable<Integer> {
      * @param value - data for create Node.
      */
     public void add(int value) {
-
+        add(size(), value);
     }
 
     /**
@@ -37,8 +45,19 @@ public class CustomLinkedList implements Iterable<Integer> {
      *
      * @param index
      */
-    public int get(int index) {
-       return 0;
+    public int get(int index) throws IndexOutOfBoundsException {
+        if (index < 0 || size() <= index) {
+            throw new IndexOutOfBoundsException(index);
+        }
+
+        Node cur = head;
+
+        while (index != 0 && cur.next != null) {
+            cur = cur.next;
+            index--;
+        }
+
+        return cur.value;
     }
 
     /**
@@ -51,8 +70,25 @@ public class CustomLinkedList implements Iterable<Integer> {
      * @param i - index
      * @param value - data for create Node.
      */
-    public void add(int i, int value) {
+    public void add(int i, int value) throws IndexOutOfBoundsException {
+        if (i < 0 || size() < i) {
+            throw new IndexOutOfBoundsException(i);
+        }
 
+        Node cur = head;
+        Node node = new Node(value);
+
+        if (i == 0) {
+            node.next = head;
+            head = node;
+        } else {
+            while (i > 1) {
+                cur = cur.next;
+                i--;
+            }
+            node.setNext(cur.next);
+            cur.setNext(node);
+        }
     }
 
     /**
@@ -64,8 +100,23 @@ public class CustomLinkedList implements Iterable<Integer> {
      *
      * @param index - position what element need remove.
      */
-    public void removeElement(int index) {
+    public void removeElement(int index) throws IndexOutOfBoundsException {
+        if (index < 0 || size() <= index) {
+            throw new IndexOutOfBoundsException(index);
+        }
 
+        Node cur = head;
+
+        while (index > 1) {
+            cur = cur.next;
+            index--;
+        }
+
+        if (index == 0) {
+            head = head.next;
+        } else {
+            cur.next = cur.next.next;
+        }
     }
 
     /**
@@ -77,7 +128,19 @@ public class CustomLinkedList implements Iterable<Integer> {
      *  После исполнения метода последовательность должна быть такой "4 -> 3 -> 2 -> 1 -> null"
      */
     public void revertList() {
+        if (head == null) {
+            return;
+        }
+        revertList(head, size() - 1);
+    }
 
+    private void revertList(Node start, int shift) {
+        if (start.next != null) {
+            revertList(start.next, shift - 1);
+        }
+
+        removeElement(size() - 1);
+        add(shift, start.value);
     }
 
     /**
@@ -92,7 +155,19 @@ public class CustomLinkedList implements Iterable<Integer> {
      */
     @Override
     public String toString() {
-        return "1 -> 2 -> 3 -> null";
+        if (head == null) {
+            return "null";
+        }
+
+        Node cur = head;
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < size(); i++) {
+            str.append(cur.value).append(" -> ");
+            cur = cur.next;
+        }
+        str.append("null");
+
+        return str.toString();
     }
 
     /**
@@ -103,7 +178,31 @@ public class CustomLinkedList implements Iterable<Integer> {
      */
     @Override
     public Iterator<Integer> iterator() {
-        return null;
+        class MyListIterator implements Iterator<Integer> {
+            Node cur;
+
+            MyListIterator(Node head) {
+                cur = head;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return cur != null;
+            }
+
+            @Override
+            public Integer next() {
+                if (hasNext()) {
+                    Integer i = cur.value;
+                    cur = cur.next;
+                    return i;
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+        }
+
+        return new MyListIterator(head);
     }
 
     private static class Node {
