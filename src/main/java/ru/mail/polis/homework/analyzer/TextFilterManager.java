@@ -1,6 +1,8 @@
 package ru.mail.polis.homework.analyzer;
 
 
+import java.util.Arrays;
+
 /**
  * Задание написать систему фильтрации комментариев.
  * Надо реализовать три типа обязательных фильтров
@@ -30,8 +32,11 @@ package ru.mail.polis.homework.analyzer;
  * 2 тугрика за класс
  * 5 тугриков за приоритет
  * Итого 20 тугриков за все задание
+ *
  */
 public class TextFilterManager {
+
+    private final TextAnalyzer[] filters;
 
     /**
      * Для работы с каждым элементом массива, нужно использовать цикл for-each
@@ -39,13 +44,56 @@ public class TextFilterManager {
      * что в них реализован интерфейс TextAnalyzer
      */
     public TextFilterManager(TextAnalyzer[] filters) {
-
+        // Сортировка фильтров по приоритетам
+        sort(filters);
+        this.filters = filters;
     }
 
     /**
      * Если переменная текст никуда не ссылается, то это означает, что не один фильтр не сработал
      */
     public FilterType analyze(String text) {
-        return null;
+        FilterType cur;
+
+        for (TextAnalyzer analyzer: filters) {
+            cur = analyzer.analyze(text);
+            if (cur != FilterType.GOOD) {
+                return cur;
+            }
+        }
+
+        return FilterType.GOOD;
     }
+
+    /*public static void main(String[] args) {
+        String str = "Hel:(lo foworld! =(";
+        TextAnalyzer[] t = { TextAnalyzer.createCustomAnalyzer(null),
+                TextAnalyzer.createNegativeTextAnalyzer(),
+                TextAnalyzer.createSpamAnalyzer(new String[] {"fool", "bastard"}),
+                TextAnalyzer.createTooLongAnalyzer(30)};
+
+        TextFilterManager txt = new TextFilterManager(t);
+
+        System.out.println(txt.analyze(str));
+    }*/
+
+
+    private static void sort(TextAnalyzer[] filters) {
+        for (int j = 0; j < filters.length - 1; j++) {
+
+            for (int i = j + 1; i < filters.length; i++) {
+                if (filters[j].getPriority() > filters[i].getPriority()) {
+                    swap(j, i, filters);
+                }
+            }
+
+        }
+    }
+
+    private static void swap(int first, int second, TextAnalyzer[] filters) {
+        TextAnalyzer cur = filters[first];
+        filters[first] = filters[second];
+        filters[second] = cur;
+    }
+
 }
