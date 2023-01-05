@@ -5,12 +5,12 @@ package ru.mail.polis.homework.generics.bot.handler;
  *
  * 1 тугрик за типизацию интерфейса и 1 тугрик за типизацию метода
  */
-public interface StateHandler {
+public interface StateHandler<State> {
     void handle();
 
     /**
      * Возвращает класс State, который этот handler умеет обрабатывать.
      * Необходимо типизировать таким образом, чтобы возвращаемый класс был не любым, а наследником State.
      */
-    Class getHandlingStateClass();
+    <T extends State> T getHandlingStateClass();
 }

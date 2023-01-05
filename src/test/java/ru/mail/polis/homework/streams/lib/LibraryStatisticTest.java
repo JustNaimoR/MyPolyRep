@@ -65,8 +65,8 @@ public class LibraryStatisticTest {
         assertEquals(2, technicalStatResult.size());
         assertNotNull(technicalStatResult.get(getUserByName(users, "Петя")));
         assertNotNull(technicalStatResult.get(getUserByName(users, "Маша")));
-        assertEquals(Integer.valueOf(2634), technicalStatResult.get(getUserByName(users, "Петя")));
         assertEquals(Integer.valueOf(2480), technicalStatResult.get(getUserByName(users, "Маша")));
+        assertEquals(Integer.valueOf(2634), technicalStatResult.get(getUserByName(users, "Петя")));
 
         assertEquals(1, novelStatResult.size());
         assertNotNull(novelStatResult.get(getUserByName(users, "Петя")));
