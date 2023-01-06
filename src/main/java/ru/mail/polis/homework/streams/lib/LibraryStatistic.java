@@ -1,8 +1,11 @@
 package ru.mail.polis.homework.streams.lib;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,8 +38,8 @@ public class LibraryStatistic {
                                                                                 a.getUser().equals(user) &&
                                                                                 TimeUnit.MILLISECONDS.toDays(a.getReturned().getTime() - a.getTake().getTime()) >= 14);
         return library.getUsers().stream().filter(user -> matchedBooks.apply(user).count() >= 5)
-                        .collect(Collectors.toMap(user -> user, user -> matchedBooks.apply(user)
-                        .mapToInt(x -> x.getBook().getPage()).sum() + (user.getBook().getGenre() == genre? user.getReadedPages(): 0)));
+                        .collect(Collectors.toMap(user -> user, user ->
+                                matchedBooks.apply(user).mapToInt(x -> x.getBook().getPage()).sum() + (user.getBook().getGenre() == genre? user.getReadedPages(): 0)));
     }
 
     /**
@@ -48,18 +51,12 @@ public class LibraryStatistic {
      */
     public Genre loveGenre(Library library, User user) {
         // Мапа с количеством книг каждого жанра, которые прочитал пользователь
-        Map<Genre, Integer> map = new HashMap<>();
 
-        library.getArchive().stream()
+        Map<Genre, Integer> map = library.getArchive().stream()
                 .filter(archivedData -> archivedData.getUser().equals(user))
-                .peek(archivedData -> {
-                    Book curBook = archivedData.getBook();
-                    if (map.containsKey(curBook.getGenre())) {
-                        map.put(curBook.getGenre(), map.get(curBook.getGenre()) + 1);
-                    } else {
-                        map.put(curBook.getGenre(), 1);
-                    }
-                }).close();
+                .collect(Collectors.toMap(archivedData -> archivedData.getBook().getGenre(),
+                                          a -> 1,
+                                          Integer::sum));
         return map.entrySet().stream().max((x, y) -> {
                     if (x.getValue() > y.getValue()) {
                         return 1;
@@ -106,7 +103,19 @@ public class LibraryStatistic {
      * @return - список ненадежных пользователей
      */
     public List<User> unreliableUsers(Library library) {
-        return null;
+        Predicate<User> pred = (user) -> {
+            long unreliable = library.getArchive().stream()
+                    .filter(archivedData -> archivedData.getUser().equals(user))
+                    .filter(archivedData -> archivedData.getReturned() == null ||
+                            Duration.between(archivedData.getTake().toLocalDateTime(), archivedData.getReturned().toLocalDateTime()).toDays() > 30)
+                    .count();
+            long general = library.getArchive().stream()
+                    .filter(archivedData -> archivedData.getUser().equals(user))
+                    .count();
+            return unreliable > general / 2;
+        };
+
+        return library.getUsers().stream().filter(pred).collect(Collectors.toList());
     }
 
     /**
@@ -116,7 +125,9 @@ public class LibraryStatistic {
      * @return - список книг
      */
     public List<Book> booksWithMoreCountPages(Library library, int countPage) {
-        return null;
+        return library.getBooks().stream()
+                .filter(book -> book.getPage() >= countPage)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -125,6 +136,23 @@ public class LibraryStatistic {
      * @return - map жанр / самый популярный автор
      */
     public Map<Genre, String> mostPopularAuthorInGenre(Library library) {
-        return null;
+        return Arrays.stream(Genre.values()).collect(Collectors.toMap(genre -> genre, genre -> {
+
+            Map<String, Integer> authorRank = library.getBooks().stream()
+                    .filter(book -> book.getGenre() == genre)
+                    .collect(Collectors.toMap(Book::getAuthor, x -> 1, Integer::sum));
+
+            return authorRank.entrySet().stream()
+                    .max((entry1, entry2) -> {
+                        if (entry1.getValue() > entry2.getValue()) {
+                            return 1;
+                        } else if (entry1.getValue() < entry2.getValue()){
+                            return -1;
+                        } else {
+                            return entry2.getKey().compareTo(entry1.getKey());
+                        }
+                    }).get().getKey();
+
+        }));
     }
 }
