@@ -1,9 +1,9 @@
 package ru.mail.polis.homework.io.blocking;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Вам нужно реализовать StructureInputStream, который умеет читать данные из файла.
@@ -18,13 +18,30 @@ public class StructureInputStream extends FileInputStream {
         super(fileName);
     }
 
-
     /**
      * Метод должен вернуть следующую прочитанную структуру.
      * Если структур в файле больше нет, то вернуть null
      */
     public Structure readStructure() throws IOException {
-        return null;
+        int sizeOFsize = read();
+        if (sizeOFsize == -1)
+            // End of the file
+            return null;
+        int size = 0;
+        for (int i = 0; i < sizeOFsize; i++) {
+            size += read();
+            if (i + 1 != sizeOFsize)
+                size <<= 8;
+        }
+        byte[] byteObj = new byte[size];
+
+        int result = read(byteObj);
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(byteObj))) {
+            return (Structure) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -32,6 +49,27 @@ public class StructureInputStream extends FileInputStream {
      * Если файл уже прочитан, но возвращается полный массив.
      */
     public Structure[] readStructures() throws IOException {
-        return new Structure[0];
+        getChannel().position(0);
+
+        List<Structure> list = new ArrayList<>();
+
+        Structure cur = readStructure();
+        while (cur != null) {
+            list.add(cur);
+            cur = readStructure();
+        }
+
+        if (list.size() != 0)
+            return list.toArray(new Structure[0]);
+        else
+            return new Structure[0];
+
+        /*Structure cur = readStructure();
+        while(cur != null) {
+            list.add(cur);
+            cur = readStructure();
+        }
+
+        return list.size() == 0? new Structure[0]: (Structure[]) list.toArray();*/
     }
 }

@@ -1,9 +1,7 @@
 package ru.mail.polis.homework.io.blocking;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.Arrays;
 
 /**
  * Вам нужно реализовать StructureOutputStream, который умеет писать данные в файл.
@@ -20,12 +18,40 @@ public class StructureOutputStream extends FileOutputStream {
      * Метод должен вернуть записать прочитанную структуру.
      */
     public void write(Structure structure) throws IOException {
+        byte[] byteObj;
+
+        try (ByteArrayOutputStream b = new ByteArrayOutputStream()) {
+            try(ObjectOutputStream o = new ObjectOutputStream(b)){
+                o.writeObject(structure);
+            }
+            byteObj = b.toByteArray();
+        }
+
+        // Записываем количество занимаемых байт под размер объекта
+        int kBytes = byteObj.length / 256 + (byteObj.length % 256 != 0? 1: 0);
+        write(kBytes);
+        // Записываем размер объекта
+        for (int i = 0; i < kBytes; i++) {
+            write((byteObj.length & (0b11111111 << (kBytes - i - 1) * 8)) >> (kBytes - i - 1) * 8);
+        }
+        //write(byteObj.length);
+        write(byteObj);
+
+        /*
+        ObjectOutputStream oos = new ObjectOutputStream(this);
+        ByteArrayOutputStream bais = new ByteArrayOutputStream(oos);
+
+        oos.writeObject(structure);
+        oos.close();
+        */
     }
 
     /**
      * Метод должен вернуть записать массив прочитанных структур.
      */
     public void write(Structure[] structures) throws IOException {
-
+        for (Structure cur: structures) {
+            write(cur);
+        }
     }
 }

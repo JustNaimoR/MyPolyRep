@@ -1,6 +1,5 @@
 package ru.mail.polis.homework.io.objects;
 
-
 import java.util.Collections;
 import java.util.List;
 

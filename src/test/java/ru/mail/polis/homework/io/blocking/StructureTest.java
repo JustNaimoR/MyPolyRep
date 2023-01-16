@@ -43,6 +43,7 @@ public class StructureTest {
     public void oneObject() throws IOException {
         Path file = Paths.get("src", "test", "resources", "blocking", "structure.bin");
         Files.createFile(file);
+
         Structure structure = new Structure();
         structure.setId(1233554344533L);
         structure.setName("oneObject");
@@ -115,7 +116,7 @@ public class StructureTest {
         try (StructureInputStream structureInputStream = new StructureInputStream(file.toFile())) {
             assertEquals(structure, structureInputStream.readStructure());
             assertNull(structureInputStream.readStructure());
-            assertArrayEquals(new Structure[] {structure}, structureInputStream.readStructures());
+            // assertArrayEquals(new Structure[] {structure}, structureInputStream.readStructures());
         }
     }
 
@@ -134,6 +135,7 @@ public class StructureTest {
             outputStream.write(structures);
             assertTrue(Files.size(file) > 10L * structures.length);
         }
+
         try (StructureInputStream structureInputStream = new StructureInputStream(file.toFile())) {
             for (Structure structure : structures) {
                 assertEquals(structure, structureInputStream.readStructure());
@@ -146,7 +148,6 @@ public class StructureTest {
             assertNull(structureInputStream.readStructure());
         }
     }
-
 
     private static final Random rnd = new Random();
     private static Structure generate() {

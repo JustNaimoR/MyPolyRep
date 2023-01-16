@@ -8,4 +8,21 @@ package ru.mail.polis.homework.io.objects;
  * 1 тугрик
  */
 public class Animal {
+    public boolean wild;
+    public boolean hasWool;
+    public int legs;
+    public String name;
+    public SomeClass someClass;
+    enum Type {
+        CAT,
+        DOG,
+        OTHER
+    }
+
+
+
+    public static class SomeClass {
+
+    }
+
 }
