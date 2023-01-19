@@ -1,14 +1,11 @@
 package ru.mail.polis.homework.reflection;
 
-import ru.mail.polis.homework.reflection.objects.easy.Easy;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Необходимо реализовать метод reflectiveToString, который для произвольного объекта
@@ -30,11 +27,11 @@ import java.util.stream.Stream;
  * потом в алфавитном порядке поля объявленные в родительском классе и так далее по иерархии наследования.
  * Примеры можно посмотреть в тестах.
  * <p>
- * Какие поля выводить
+   Какие поля выводить
  * Необходимо включать только нестатические поля. Также нужно пропускать поля, помеченные аннотацией @SkipField
  * <p>
  * Упрощения
- * Чтобы не усложнять задание, предполагаем, что нет циклических ссылок, inner классов, и transient полей
+   Чтобы не усложнять задание, предполагаем, что нет циклических ссылок, inner классов, и transient полей
  * <p>
  * Реализация
  * В пакете ru.mail.polis.homework.reflection можно редактировать только этот файл
@@ -52,8 +49,105 @@ import java.util.stream.Stream;
  */
 public class ReflectionToStringHelper {
 
-    public static String reflectiveToString(Object object) {
-        // TODO: implement
-        return null;
+    public static String reflectiveToString(Object o) {
+        if (o == null)
+            return "null";
+        StringBuilder string = new StringBuilder("{");
+
+        for (Class<?> clazz =  o.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+            Arrays.stream(clazz.getDeclaredFields())
+                    .filter(x -> !Modifier.isStatic(x.getModifiers()))
+                    .filter(x -> Arrays.stream(x.getDeclaredAnnotations()).noneMatch(a -> a.annotationType().equals(SkipField.class)))
+                    .sorted(Comparator.comparing(Field::getName))
+                    .map(x -> {
+                        try {
+                            x.setAccessible(true);
+                            if (x.getType().isArray()) {
+                                // Is an array
+                                if (x.get(o) == null)
+                                    return x.getName() + ": null";
+
+                                StringBuilder sb = new StringBuilder(x.getName() + ": [");
+                                for (int i = 0; i < Array.getLength(x.get(o)); i++) {
+                                    sb.append(Array.get(x.get(o), i)).append(", ");
+                                }
+
+                                if (Array.getLength(x.get(o)) != 0) {
+                                    return sb.delete(sb.length() - 2, sb.length()).append("]").toString();
+                                } else {
+                                    return sb.append("]").toString();
+                                }
+                            } else {
+                                // Isn't an array
+                                return x.getName() + ": " + x.get(o);
+                            }
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .forEach(str -> string.append(str).append(", "));
+        }
+        if (string.length() == 1) {
+            // пустая строка, лишь { в ней
+            return string.append("}").toString();
+        } else {
+            return string.delete(string.length() - 2, string.length()).append("}").toString();
+        }
+//        Class<?> clazz = (o instanceof Class<?>)? (Class<?>) o : o.getClass();
+//
+//        String res = Arrays.stream(clazz.getDeclaredFields())
+//                    .sorted(Comparator.comparing(Field::getName))
+//                    .map(x -> {
+//                        x.setAccessible(true);
+//                        try {
+//                            if (!x.getType().isArray()) {
+//                                // Isn't an array
+//                                return x.getName() + ": " + x.get(o);
+//                            } else {
+//                                // Is an array
+//                                StringBuilder sb = new StringBuilder(x.getName() + ": [");
+//                                for (int i = 0; i < Array.getLength(x.get(o)); i++) {
+//                                    sb.append(Array.get(x.get(o), i)).append(", ");
+//                                }
+//
+//                                return sb.delete(sb.length() - 2, sb.length()).append("]").toString();
+//                            }
+//                        } catch (IllegalAccessException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                     })
+//                     .reduce((s1, s2) -> s1 + ", " + s2)
+//                .orElse("");
+//
+//
+//        if (clazz.getSuperclass() != Object.class) {
+//            return "{" + res + reflectiveToString(clazz.getSuperclass()).replaceFirst("\\{", " ");
+//        } else {
+//            return "{" + res + "}";
+//        }
+//
     }
+
+    public static void main(String[] args) {
+        class B {}
+        class A extends B {}
+
+        class SomeParent {
+            int parentPole = 25;
+            boolean[] mass = {true, false};
+        }
+
+        class SomeClazz extends SomeParent {
+             private final String name = "Hello world!";
+             public int digit = 10;
+             private int name2 = 20200;
+             int[] mass2 = {1, 45, 34};
+//             private final A[] mass = {new A(), new A(), new A()};
+             A param = null;
+        }
+
+
+        System.out.println(reflectiveToString(new SomeClazz()));
+    }
+
 }

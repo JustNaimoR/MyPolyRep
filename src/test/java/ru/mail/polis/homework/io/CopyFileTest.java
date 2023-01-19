@@ -21,8 +21,8 @@ import static org.junit.Assert.fail;
 
 public class CopyFileTest {
 
-    @Before
-    public void setUp() throws Exception {
+//    @Before
+//    public void setUp() throws Exception {
 //        // --------------------------------------- create source for copyOnlyFile --------------------------------------
 //        Path dir = Paths.get("src", "test", "resources", "directories", "copy", "first");
 //        Path file = Paths.get("src", "test", "resources", "directories", "copy", "first", "file.txt");
@@ -87,8 +87,8 @@ public class CopyFileTest {
 //                    "file" + i + ".txt"));
 //        }
 //        // --------------------------------------- create source for copyDirHard ---------------------------------------
-
-    }
+//
+//    }
 
     @After
     public void tearDown() throws Exception {
@@ -96,7 +96,7 @@ public class CopyFileTest {
     }
 
     @Test
-    public void copyOnlyFile() throws IOException {
+    public void copyOnlyFile() throws Exception {
         Path file = Paths.get("src", "test", "resources", "directories", "copy", "first", "file.txt");
         Path dest = Paths.get("src", "test", "resources", "directories", "copy1", "first", "file.txt");
         CopyFile.copyFiles(file.toString(), dest.toString());
