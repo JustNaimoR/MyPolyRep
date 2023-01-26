@@ -1,6 +1,8 @@
 package ru.mail.polis.homework.concurrency.executor;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Нужно сделать свой executor с ленивой инициализацией потоков до какого-то заданного предела.
@@ -14,9 +16,15 @@ import java.util.concurrent.Executor;
  * Max 10 тугриков
  */
 public class SimpleExecutor implements Executor {
+    private final int maxThreadCount;
+    private int threadCount = 0;
+    long lastTaskTime = 0;
+
+    LinkedBlockingDeque<Runnable> taskDeque = new LinkedBlockingDeque<>();
+    ArrayList<Thread> threadList = new ArrayList<>();
 
     public SimpleExecutor(int maxThreadCount) {
-
+        this.maxThreadCount = maxThreadCount;
     }
 
     /**
@@ -25,6 +33,14 @@ public class SimpleExecutor implements Executor {
      */
     @Override
     public void execute(Runnable command) {
+        // Если разница прихода задач более 5 секунд
+        if (System.currentTimeMillis() - lastTaskTime > 5_000) {
+
+        }
+
+
+
+
 
     }
 
@@ -33,6 +49,7 @@ public class SimpleExecutor implements Executor {
      * 1 тугрик за метод
      */
     public void shutdown() {
+
     }
 
     /**
@@ -47,6 +64,6 @@ public class SimpleExecutor implements Executor {
      * Должен возвращать количество созданных потоков.
      */
     public int getLiveThreadsCount() {
-        return 0;
+        return threadCount;
     }
 }

@@ -93,39 +93,6 @@ public class ReflectionToStringHelper {
         } else {
             return string.delete(string.length() - 2, string.length()).append("}").toString();
         }
-//        Class<?> clazz = (o instanceof Class<?>)? (Class<?>) o : o.getClass();
-//
-//        String res = Arrays.stream(clazz.getDeclaredFields())
-//                    .sorted(Comparator.comparing(Field::getName))
-//                    .map(x -> {
-//                        x.setAccessible(true);
-//                        try {
-//                            if (!x.getType().isArray()) {
-//                                // Isn't an array
-//                                return x.getName() + ": " + x.get(o);
-//                            } else {
-//                                // Is an array
-//                                StringBuilder sb = new StringBuilder(x.getName() + ": [");
-//                                for (int i = 0; i < Array.getLength(x.get(o)); i++) {
-//                                    sb.append(Array.get(x.get(o), i)).append(", ");
-//                                }
-//
-//                                return sb.delete(sb.length() - 2, sb.length()).append("]").toString();
-//                            }
-//                        } catch (IllegalAccessException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                     })
-//                     .reduce((s1, s2) -> s1 + ", " + s2)
-//                .orElse("");
-//
-//
-//        if (clazz.getSuperclass() != Object.class) {
-//            return "{" + res + reflectiveToString(clazz.getSuperclass()).replaceFirst("\\{", " ");
-//        } else {
-//            return "{" + res + "}";
-//        }
-//
     }
 
     public static void main(String[] args) {
