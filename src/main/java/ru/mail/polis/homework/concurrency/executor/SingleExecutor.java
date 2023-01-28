@@ -10,10 +10,10 @@ import java.util.concurrent.*;
  */
 public class SingleExecutor implements Executor {
 
-    private final LinkedBlockingDeque<Runnable> taskDeque = new LinkedBlockingDeque<>();
+    private final LinkedBlockingQueue<Runnable> taskDeque = new LinkedBlockingQueue<>();
     private int taskCount = 0;
     private boolean allDone = false;
-    private boolean play = true;
+    private volatile boolean play = true;
     private boolean fallAsleep = false;
     private final Thread singleThread = new Thread(() -> {
         while (play) {
@@ -23,11 +23,12 @@ public class SingleExecutor implements Executor {
 
             if (play) {
                 taskCount--;
-                taskDeque.pop().run();
+//                taskDeque.take();
+//                taskDeque.pop().run();
             }
             if (fallAsleep) {
                 while (taskCount != 0) {
-                    taskDeque.pop().run();
+//                    taskDeque.pop().run();
                     taskCount--;
                 }
 
@@ -51,7 +52,7 @@ public class SingleExecutor implements Executor {
         if (!play || fallAsleep)
             throw new RejectedExecutionException();
 
-        taskDeque.addLast(command);
+//        taskDeque.addLast(command);
         taskCount++;
     }
 
@@ -76,23 +77,15 @@ public class SingleExecutor implements Executor {
 
     public static void main(String[] args) {
 
-        SingleExecutor executor = new SingleExecutor();
-        Runnable task1 = () -> System.out.println("Task1!");
-        Runnable task2 = () -> {
-            try {
-                Thread.sleep(1_000);
-                System.out.println("Task2 Done!");
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        Runnable task3 = () -> System.out.println("Task3!");
-        Runnable task4 = () -> System.out.println("Task4!");
-
-        //executor.execute(task1);
-        executor.execute(task2);
-        executor.shutdownNow();
-        System.out.println("Done!");
+        try {
+            throw new Exception();
+            //System.out.println("1");
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getMessage();
+            System.out.println("2");
+        }
+        System.out.println("3");
     }
 
 }
