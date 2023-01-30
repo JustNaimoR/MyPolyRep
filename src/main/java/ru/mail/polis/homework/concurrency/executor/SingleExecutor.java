@@ -12,7 +12,6 @@ import java.util.concurrent.*;
 public class SingleExecutor implements Executor {
 
     private final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
-    private volatile boolean fallAsleep = false;
     private volatile boolean isActive = true;
     private final Thread singleThread = new Thread(() -> {
         while (!Thread.currentThread().isInterrupted() && (isActive || taskQueue.size() != 0)
