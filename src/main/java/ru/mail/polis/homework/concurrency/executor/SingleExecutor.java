@@ -1,5 +1,6 @@
 package ru.mail.polis.homework.concurrency.executor;
 
+import java.util.Queue;
 import java.util.concurrent.*;
 /**
  * Нужно сделать свой executor с одним вечным потоком. Пока не вызовут shutdown или shutdownNow
@@ -10,30 +11,16 @@ import java.util.concurrent.*;
  */
 public class SingleExecutor implements Executor {
 
-    private final LinkedBlockingQueue<Runnable> taskDeque = new LinkedBlockingQueue<>();
-    private int taskCount = 0;
-    private boolean allDone = false;
-    private volatile boolean play = true;
-    private boolean fallAsleep = false;
+    private final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
+    private volatile boolean fallAsleep = false;
+    private volatile boolean isActive = true;
     private final Thread singleThread = new Thread(() -> {
-        while (play) {
+        while (!Thread.currentThread().isInterrupted() && (isActive || taskQueue.size() != 0)
+                /*!Thread.currentThread().isInterrupted() || (fallAsleep && taskQueue.size() != 0)*/ ) {
 
-            // Ожидания потоком новой задачи
-            while (taskCount == 0);
-
-            if (play) {
-                taskCount--;
-//                taskDeque.take();
-//                taskDeque.pop().run();
-            }
-            if (fallAsleep) {
-                while (taskCount != 0) {
-//                    taskDeque.pop().run();
-                    taskCount--;
-                }
-
-                play = false;
-            }
+                try {
+                    taskQueue.take().run();
+                } catch (InterruptedException e) {}
 
         }
     });
@@ -49,11 +36,10 @@ public class SingleExecutor implements Executor {
      */
     @Override
     public void execute(Runnable command) {
-        if (!play || fallAsleep)
+        if (!isActive)
             throw new RejectedExecutionException();
 
-//        taskDeque.addLast(command);
-        taskCount++;
+        taskQueue.add(command);
     }
 
     /**
@@ -61,8 +47,7 @@ public class SingleExecutor implements Executor {
      * 1 тугрик за метод
      */
     public void shutdown() {
-        fallAsleep = true;
-        taskCount++;
+        isActive = false;
     }
 
     /**
@@ -70,22 +55,23 @@ public class SingleExecutor implements Executor {
      * 2 тугрика за метод
      */
     public void shutdownNow() {
-        play = false;
-        if (taskCount == 0)
-            taskCount++;
+        isActive = false;
+        singleThread.interrupt();
     }
 
-    public static void main(String[] args) {
-
-        try {
-            throw new Exception();
-            //System.out.println("1");
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getMessage();
-            System.out.println("2");
-        }
-        System.out.println("3");
-    }
+//    public static void main(String[] args) throws InterruptedException {
+//        SingleExecutor singleExecutor = new SingleExecutor();
+//        for (int i = 0; i < 10; i++) {
+//            if (i < 2) {
+//                singleExecutor.taskQueue.add(() -> {});
+//            } else {
+//                System.out.println(singleExecutor.taskQueue.take());
+//            }
+//
+//            System.out.println("Attempt " + i);
+//        }
+//
+//        System.out.println("This is it!");
+//    }
 
 }
